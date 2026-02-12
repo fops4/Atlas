@@ -1,5 +1,5 @@
 import { Link, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Wallet, Users, Sprout, Truck, Wrench, LogOut, ChevronLeft, ChevronRight } from 'lucide-react';
+import { LayoutDashboard, Wallet, Users, Sprout, Truck, Wrench, LogOut, ChevronLeft, ChevronRight, Settings as SettingsIcon } from 'lucide-react';
 import { cn } from '../../lib/utils';
 import { useUIStore } from '../../store/uiStore';
 
@@ -10,6 +10,7 @@ const navigation = [
   { name: 'Exploitation Agricole', href: '/operations', icon: Sprout },
   { name: 'Logistique & Stocks', href: '/logistics', icon: Truck },
   { name: 'Parc Technique', href: '/technical', icon: Wrench },
+  { name: 'Paramètres', href: '/settings', icon: SettingsIcon },
 ];
 
 export function Sidebar() {

@@ -9,6 +9,8 @@ import HR from './pages/HR';
 import FieldOps from './pages/FieldOps';
 import Logistics from './pages/Logistics';
 import Technical from './pages/Technical';
+import Settings from './pages/Settings';
+import Profile from './pages/Profile';
 
 function App() {
   return (
@@ -25,6 +27,8 @@ function App() {
             <Route path="/operations" element={<FieldOps />} />
             <Route path="/logistics" element={<Logistics />} />
             <Route path="/technical" element={<Technical />} />
+            <Route path="/settings" element={<Settings />} />
+            <Route path="/profile" element={<Profile />} />
           </Route>
         </Route>
         

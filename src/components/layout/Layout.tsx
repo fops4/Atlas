@@ -3,6 +3,8 @@ import { Header } from './Header';
 import { Outlet } from 'react-router-dom';
 import { useUIStore } from '../../store/uiStore';
 import { cn } from '../../lib/utils';
+import { NotificationContainer } from '../ui/Notification';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 export function Layout() {
   const { isSidebarOpen } = useUIStore();
@@ -21,6 +23,8 @@ export function Layout() {
           <Outlet />
         </div>
       </main>
+      <NotificationContainer />
+      <ConfirmDialog />
     </div>
   );
 }
