@@ -66,8 +66,8 @@ export function Sidebar() {
           </button>
         </div>
         
-        <nav className="flex-1 overflow-y-auto py-4">
-          <ul className="space-y-1 px-3">
+        <nav className="flex-1 overflow-y-auto py-4" aria-label="Navigation principale">
+          <ul className="space-y-1 px-3" role="list">
             {navigation.map((item) => {
               const Icon = item.icon;
               const isActive = location.pathname === item.href;
@@ -83,8 +83,10 @@ export function Sidebar() {
                         : "text-slate-400 hover:text-white hover:bg-slate-800"
                     )}
                     title={!isSidebarOpen ? item.name : undefined}
+                    aria-label={item.name}
+                    aria-current={isActive ? 'page' : undefined}
                   >
-                    <Icon className="w-5 h-5 flex-shrink-0" />
+                    <Icon className="w-5 h-5 flex-shrink-0" aria-hidden="true" />
                     <span className={cn(
                       "whitespace-nowrap transition-opacity duration-300",
                       isSidebarOpen ? "opacity-100" : "opacity-0 w-0"

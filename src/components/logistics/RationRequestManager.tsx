@@ -23,27 +23,40 @@ function RationForm({ isOpen, onClose, requestToEdit }: RationFormProps) {
     requestedBy: requestToEdit?.requestedBy || '',
     date: requestToEdit?.date || new Date().toISOString().split('T')[0],
     notes: requestToEdit?.notes || '',
-    items: requestToEdit?.items || [{ name: '', quantity: 0, unit: 'kg' }] as RationItem[]
+    items: requestToEdit?.items || [{ name: '', quantity: 0, unit: 'kg', unitPrice: 0 }] as RationItem[],
+    totalAmount: requestToEdit?.totalAmount || 0
   });
 
+  const calculateTotal = (items: RationItem[]) => {
+    return items.reduce((acc, item) => acc + (item.quantity * (item.unitPrice || 0)), 0);
+  };
+
   const handleAddItem = () => {
+    const newItems = [...formData.items, { name: '', quantity: 0, unit: 'kg', unitPrice: 0 }];
     setFormData({
       ...formData,
-      items: [...formData.items, { name: '', quantity: 0, unit: 'kg' }]
+      items: newItems,
+      totalAmount: calculateTotal(newItems)
     });
   };
 
   const handleRemoveItem = (index: number) => {
+    const newItems = formData.items.filter((_, i) => i !== index);
     setFormData({
       ...formData,
-      items: formData.items.filter((_, i) => i !== index)
+      items: newItems,
+      totalAmount: calculateTotal(newItems)
     });
   };
 
   const handleItemChange = (index: number, field: keyof RationItem, value: string | number) => {
     const newItems = [...formData.items];
     newItems[index] = { ...newItems[index], [field]: value };
-    setFormData({ ...formData, items: newItems });
+    setFormData({ 
+      ...formData, 
+      items: newItems,
+      totalAmount: calculateTotal(newItems)
+    });
   };
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -56,16 +69,16 @@ function RationForm({ isOpen, onClose, requestToEdit }: RationFormProps) {
 
     if (requestToEdit) {
       updateRationRequest(requestToEdit.id, formData);
-      notify.success('Demande modifiée avec succès');
+      notify.success('Expression du besoin modifiée avec succès');
     } else {
       addRationRequest(formData);
-      notify.success('Nouvelle demande créée');
+      notify.success('Nouvelle expression du besoin créée');
     }
     onClose();
   };
 
   return (
-    <Modal isOpen={isOpen} onClose={onClose} title={requestToEdit ? "Modifier la demande" : "Nouvelle demande de rations"}>
+    <Modal isOpen={isOpen} onClose={onClose} title={requestToEdit ? "Modifier l'expression du besoin" : "Nouvelle expression du besoin"}>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -133,7 +146,7 @@ function RationForm({ isOpen, onClose, requestToEdit }: RationFormProps) {
                   type="text"
                   required
                   placeholder="Article"
-                  className="col-span-5 p-2 text-sm border border-slate-300 rounded-lg"
+                  className="col-span-4 p-2 text-sm border border-slate-300 rounded-lg"
                   value={item.name}
                   onChange={e => handleItemChange(index, 'name', e.target.value)}
                 />
@@ -143,9 +156,18 @@ function RationForm({ isOpen, onClose, requestToEdit }: RationFormProps) {
                   min="0.1"
                   step="0.1"
                   placeholder="Qté"
-                  className="col-span-3 p-2 text-sm border border-slate-300 rounded-lg"
+                  className="col-span-2 p-2 text-sm border border-slate-300 rounded-lg"
                   value={item.quantity || ''}
                   onChange={e => handleItemChange(index, 'quantity', parseFloat(e.target.value))}
+                />
+                <input
+                  type="number"
+                  required
+                  min="0"
+                  placeholder="Prix"
+                  className="col-span-2 p-2 text-sm border border-slate-300 rounded-lg"
+                  value={item.unitPrice || ''}
+                  onChange={e => handleItemChange(index, 'unitPrice', parseFloat(e.target.value))}
                 />
                 <select
                   className="col-span-3 p-2 text-sm border border-slate-300 rounded-lg"
@@ -166,6 +188,10 @@ function RationForm({ isOpen, onClose, requestToEdit }: RationFormProps) {
                 </button>
               </div>
             ))}
+          </div>
+          <div className="mt-4 flex justify-between items-center bg-slate-50 p-3 rounded-lg border border-slate-200">
+            <span className="text-sm font-medium text-slate-700">Montant Total :</span>
+            <span className="text-lg font-bold text-brand-blue">{formData.totalAmount.toLocaleString()} FCFA</span>
           </div>
         </div>
 
@@ -206,12 +232,24 @@ function RequestDetailsModal({ isOpen, onClose, request }: RequestDetailsProps) 
           <div className="space-y-2">
             {request.items.map((item, idx) => (
               <div key={idx} className="flex justify-between p-2 bg-slate-50 rounded">
-                <span className="text-sm text-slate-700">{item.name}</span>
-                <span className="text-sm font-medium text-slate-900">
-                  {item.quantity} {item.unit}
-                </span>
+                <div className="flex flex-col">
+                  <span className="text-sm text-slate-700">{item.name}</span>
+                  <span className="text-xs text-slate-500">{item.unitPrice?.toLocaleString()} FCFA / {item.unit}</span>
+                </div>
+                <div className="text-right">
+                  <p className="text-sm font-medium text-slate-900">
+                    {item.quantity} {item.unit}
+                  </p>
+                  <p className="text-xs font-semibold text-brand-blue">
+                    {((item.quantity || 0) * (item.unitPrice || 0)).toLocaleString()} FCFA
+                  </p>
+                </div>
               </div>
             ))}
+          </div>
+          <div className="mt-4 pt-3 border-t border-slate-200 flex justify-between items-center">
+            <span className="text-sm font-semibold text-slate-700">Montant Total</span>
+            <span className="text-base font-bold text-brand-blue">{request.totalAmount.toLocaleString()} FCFA</span>
           </div>
         </div>
 
@@ -342,8 +380,8 @@ export function RationRequestManager() {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Demandes de Rations</h2>
-          <p className="text-slate-500 mt-1">Gérez les demandes de rations pour les employés</p>
+          <h2 className="text-2xl font-bold text-slate-900">Expressions du besoin</h2>
+          <p className="text-slate-500 mt-1">Gérez les expressions du besoin et approvisionnements</p>
         </div>
         <button
           onClick={handleAdd}
@@ -395,6 +433,7 @@ export function RationRequestManager() {
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Demandeur</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Date</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Articles</th>
+                <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Montant</th>
                 <th className="px-6 py-3 text-left text-xs font-semibold text-slate-600 uppercase">Statut</th>
                 <th className="px-6 py-3 text-right text-xs font-semibold text-slate-600 uppercase">Actions</th>
               </tr>
@@ -406,6 +445,7 @@ export function RationRequestManager() {
                   <td className="px-6 py-4 text-sm font-medium text-slate-900">{request.requestedBy}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{request.date}</td>
                   <td className="px-6 py-4 text-sm text-slate-600">{request.items.length} article(s)</td>
+                  <td className="px-6 py-4 text-sm font-semibold text-brand-blue">{request.totalAmount.toLocaleString()} FCFA</td>
                   <td className="px-6 py-4">{getStatusBadge(request.status)}</td>
                   <td className="px-6 py-4">
                     <div className="flex items-center justify-end gap-2">

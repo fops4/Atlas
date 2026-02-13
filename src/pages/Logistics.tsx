@@ -65,7 +65,7 @@ export default function Logistics() {
         </div>
       </div>
 
-      {/* Ration Request Manager */}
+      {/* Need Expression Manager */}
       <RationRequestManager />
     </div>
   );

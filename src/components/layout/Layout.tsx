@@ -1,6 +1,7 @@
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
 import { Footer } from './Footer';
+import { Breadcrumbs } from './Breadcrumbs';
 import { Outlet } from 'react-router-dom';
 import { useUIStore } from '../../store/uiStore';
 import { cn } from '../../lib/utils';
@@ -21,6 +22,7 @@ export function Layout() {
       >
         <Header />
         <div className="p-4 md:p-8 flex-1 overflow-x-hidden">
+          <Breadcrumbs />
           <Outlet />
         </div>
         <Footer />
