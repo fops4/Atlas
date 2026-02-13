@@ -39,10 +39,17 @@ export default function Login() {
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden">
         <div className="p-8">
           <div className="text-center mb-8">
+            <div className="flex justify-center mb-4">
+              <img 
+                src="../../public/artifacts/atlas_logo.png" 
+                alt="ATLAS Logo" 
+                className="w-32 h-32 object-contain"
+              />
+            </div>
             <h1 className="text-3xl font-bold bg-gradient-to-r from-brand-blue to-brand-green bg-clip-text text-transparent mb-2">
-              ATLAS
+              ATLAS WHOLE SALE
             </h1>
-            <p className="text-slate-500">Connectez-vous à votre espace</p>
+            {/* <p className="text-slate-500">Connectez-vous à votre espace</p> */}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -96,14 +103,6 @@ export default function Login() {
               )}
             </button>
           </form>
-        </div>
-        <div className="bg-slate-50 px-8 py-4 border-t border-slate-100 text-center">
-          <p className="text-sm text-slate-600">
-            Pas encore de compte ?{' '}
-            <a href="/register" className="font-medium text-brand-blue hover:text-brand-blue/80">
-              S'enregistrer
-            </a>
-          </p>
         </div>
       </div>
     </div>

@@ -1,5 +1,6 @@
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { Footer } from './Footer';
 import { Outlet } from 'react-router-dom';
 import { useUIStore } from '../../store/uiStore';
 import { cn } from '../../lib/utils';
@@ -22,6 +23,7 @@ export function Layout() {
         <div className="p-4 md:p-8 flex-1 overflow-x-hidden">
           <Outlet />
         </div>
+        <Footer />
       </main>
       <NotificationContainer />
       <ConfirmDialog />

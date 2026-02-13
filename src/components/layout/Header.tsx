@@ -6,7 +6,7 @@ import { useUIStore } from '../../store/uiStore';
 
 export function Header() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [pendingSync, setPendingSync] = useState(3);
+  const [pendingSync, setPendingSync] = useState(5);
   const user = useAuthStore((state) => state.user);
   const { toggleSidebar } = useUIStore();
 
