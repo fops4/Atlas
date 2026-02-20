@@ -1,6 +1,5 @@
 import { create } from 'zustand';
 import { CheckCircle, AlertTriangle, Info, X } from 'lucide-react';
-import { useEffect } from 'react';
 
 type NotificationType = 'success' | 'error' | 'info' | 'warning';
 

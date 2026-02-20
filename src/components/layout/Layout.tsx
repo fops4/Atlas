@@ -1,8 +1,12 @@
 import { Sidebar } from './Sidebar';
 import { Header } from './Header';
+import { Footer } from './Footer';
+import { Breadcrumbs } from './Breadcrumbs';
 import { Outlet } from 'react-router-dom';
 import { useUIStore } from '../../store/uiStore';
 import { cn } from '../../lib/utils';
+import { NotificationContainer } from '../ui/Notification';
+import { ConfirmDialog } from '../ui/ConfirmDialog';
 
 export function Layout() {
   const { isSidebarOpen } = useUIStore();
@@ -18,9 +22,13 @@ export function Layout() {
       >
         <Header />
         <div className="p-4 md:p-8 flex-1 overflow-x-hidden">
+          <Breadcrumbs />
           <Outlet />
         </div>
+        <Footer />
       </main>
+      <NotificationContainer />
+      <ConfirmDialog />
     </div>
   );
 }

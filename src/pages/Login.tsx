@@ -2,10 +2,11 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../store/authStore';
 import { Lock, Mail } from 'lucide-react';
+import { authService } from '../services/authService';
 
 export default function Login() {
   const navigate = useNavigate();
-  const login = useAuthStore((state) => state.login);
+  const setAuth = useAuthStore((state) => state.login);
   const [identifier, setIdentifier] = useState('');
   const [password, setPassword] = useState('');
   const [isLoading, setIsLoading] = useState(false);
@@ -14,24 +15,19 @@ export default function Login() {
     e.preventDefault();
     setIsLoading(true);
 
-    // Simulate API call
-    setTimeout(() => {
-      login(
-        { 
-          id: '1', 
-          firstName: 'Jean-Claude', 
-          lastName: 'Dupont',
-          email: identifier, 
-          role: 'MANAGER',
-          phone: '+237699000000',
-          status: 'ACTIVE',
-          createdAt: new Date().toISOString()
-        },
-        'mock-jwt-token'
-      );
+    try {
+      // Use authService to generate a valid mock JWT
+      const { user, token } = await authService.login({ id: identifier });
+      
+      // Update store
+      setAuth(user as any, token);
+      
       setIsLoading(false);
       navigate('/');
-    }, 1500);
+    } catch (error) {
+      console.error('Login failed', error);
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -39,10 +35,17 @@ export default function Login() {
       <div className="max-w-md w-full bg-white rounded-xl shadow-lg border border-slate-100 overflow-hidden">
         <div className="p-8">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold bg-gradient-to-r from-brand-blue to-brand-green bg-clip-text text-transparent mb-2">
-              ATLAS
+            <div className="flex justify-center mb-4">
+              <img 
+                src="/artifacts/atlas_logo.png" 
+                alt="ATLAS Logo" 
+                className="w-32 h-32 object-contain"
+              />
+            </div>
+            <h1 className="text-3xl font-bold text-red-600 mb-2">
+              ATLAS WHOLE SALE
             </h1>
-            <p className="text-slate-500">Connectez-vous à votre espace</p>
+            {/* <p className="text-slate-500">Connectez-vous à votre espace</p> */}
           </div>
 
           <form onSubmit={handleSubmit} className="space-y-6">
@@ -96,14 +99,6 @@ export default function Login() {
               )}
             </button>
           </form>
-        </div>
-        <div className="bg-slate-50 px-8 py-4 border-t border-slate-100 text-center">
-          <p className="text-sm text-slate-600">
-            Pas encore de compte ?{' '}
-            <a href="/register" className="font-medium text-brand-blue hover:text-brand-blue/80">
-              S'enregistrer
-            </a>
-          </p>
         </div>
       </div>
     </div>

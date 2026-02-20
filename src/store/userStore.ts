@@ -1,10 +1,12 @@
 import { create } from 'zustand';
+import type { UserRole } from '../types';
 
 export type AccessLevel = 'NONE' | 'USER' | 'ADMIN';
 
 export interface PageAccess {
     dashboard: AccessLevel;
     finance: AccessLevel;
+    budget: AccessLevel;
     hr: AccessLevel;
     operations: AccessLevel;
     logistics: AccessLevel;
@@ -15,7 +17,7 @@ export interface User {
     id: string;
     username: string;
     email: string;
-    role: 'ADMIN' | 'USER';
+    role: UserRole;
     status: 'ACTIVE' | 'ARCHIVED';
     access: PageAccess;
     createdAt: string;
@@ -29,17 +31,11 @@ interface UserState {
     updateUser: (id: string, updates: Partial<User>) => void;
     archiveUser: (id: string) => void;
     unarchiveUser: (id: string) => void;
+    resetPassword: (id: string, newPassword: string) => void;
     setCurrentUser: (user: User) => void;
 }
 
-const defaultAccess: PageAccess = {
-    dashboard: 'USER',
-    finance: 'NONE',
-    hr: 'NONE',
-    operations: 'NONE',
-    logistics: 'NONE',
-    technical: 'NONE'
-};
+
 
 export const useUserStore = create<UserState>((set) => ({
     users: [
@@ -52,6 +48,7 @@ export const useUserStore = create<UserState>((set) => ({
             access: {
                 dashboard: 'ADMIN',
                 finance: 'ADMIN',
+                budget: 'ADMIN',
                 hr: 'ADMIN',
                 operations: 'ADMIN',
                 logistics: 'ADMIN',
@@ -60,7 +57,23 @@ export const useUserStore = create<UserState>((set) => ({
             createdAt: '2024-01-01'
         }
     ],
-    currentUser: null,
+    currentUser: {
+        id: '1',
+        username: 'admin',
+        email: 'admin@atlas.cm',
+        role: 'ADMIN',
+        status: 'ACTIVE',
+        access: {
+            dashboard: 'ADMIN',
+            finance: 'ADMIN',
+            budget: 'ADMIN',
+            hr: 'ADMIN',
+            operations: 'ADMIN',
+            logistics: 'ADMIN',
+            technical: 'ADMIN'
+        },
+        createdAt: '2024-01-01'
+    },
 
     addUser: (user) => set((state) => ({
         users: [...state.users, {
@@ -82,6 +95,12 @@ export const useUserStore = create<UserState>((set) => ({
     unarchiveUser: (id) => set((state) => ({
         users: state.users.map(u => u.id === id ? { ...u, status: 'ACTIVE' } : u)
     })),
+
+    resetPassword: (id, newPassword) => set((state) => {
+        // In a real app, this would hash the password and send to API
+        console.log(`Password reset for user ${id}: ${newPassword}`);
+        return state; // Password is not stored in frontend
+    }),
 
     setCurrentUser: (user) => set({ currentUser: user })
 }));

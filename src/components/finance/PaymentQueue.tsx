@@ -1,17 +1,19 @@
 import { useState } from 'react';
 import { useFinanceStore } from '../../store/financeStore';
 import { cn } from '../../lib/utils';
-import { Eye, CheckCircle, XCircle, MapPin, Calendar, Smartphone } from 'lucide-react';
+import { Eye, CheckCircle, XCircle, MapPin, Calendar, Smartphone, Coins, Edit } from 'lucide-react';
 import { Modal } from '../ui/Modal';
+import { EditPaymentModal } from './EditPaymentModal';
 
 export function PaymentQueue() {
-  const { pendingPayments, validatePayment, rejectPayment } = useFinanceStore();
+  const { pendingPayments, validatePayment, rejectPayment, budgets } = useFinanceStore();
   const [selectedRequestId, setSelectedRequestId] = useState<string | null>(null);
   const [isRejectModalOpen, setIsRejectModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [rejectReason, setRejectReason] = useState('');
 
   const selectedRequest = selectedRequestId 
-    ? pendingPayments.find(r => r.id === selectedRequestId) 
+    ? pendingPayments.find(r => r.id === selectedRequestId) || null 
     : null;
 
   const handleValidate = () => {
@@ -60,12 +62,20 @@ export function PaymentQueue() {
                 <div className="flex justify-between items-start mb-2">
                   <div className="flex flex-col">
                     <span className="font-medium text-slate-900">{req.task}</span>
-                    <span className={cn(
-                        "text-[10px] uppercase font-bold px-1.5 py-0.5 w-fit rounded mt-1",
-                        req.type === 'CREDIT' ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"
-                    )}>
-                        {req.type === 'CREDIT' ? 'Crédit (Recouvrement)' : 'Débit (Dépense)'}
-                    </span>
+                    <div className="flex gap-2 items-center mt-1">
+                      <span className={cn(
+                          "text-[10px] uppercase font-bold px-1.5 py-0.5 rounded",
+                          req.type === 'CREDIT' ? "bg-green-100 text-green-700" : "bg-orange-100 text-orange-700"
+                      )}>
+                          {req.type === 'CREDIT' ? 'Crédit' : 'Débit'}
+                      </span>
+                      {req.budgetId && (
+                        <span className="text-[10px] bg-blue-100 text-blue-700 font-bold px-1.5 py-0.5 rounded flex items-center gap-1">
+                          <Coins className="w-2.5 h-2.5" />
+                          {budgets.find(b => b.id === req.budgetId)?.month || 'Budget'}
+                        </span>
+                      )}
+                    </div>
                   </div>
                   <span className={cn(
                       "font-bold",
@@ -129,6 +139,27 @@ export function PaymentQueue() {
                     <p className="text-xs text-slate-500 uppercase font-semibold mb-2">Montant à valider</p>
                     <p className="text-2xl font-bold text-brand-blue">{selectedRequest.amount.toLocaleString()} FCFA</p>
                   </div>
+
+                  {selectedRequest.budgetId && (
+                    <div className="bg-blue-50/50 p-4 rounded-lg border border-blue-100">
+                      <p className="text-xs text-blue-600 uppercase font-semibold mb-2 flex items-center gap-2">
+                        <Coins className="w-4 h-4" /> Budget Assigné
+                      </p>
+                      <p className="text-lg font-bold text-slate-900">
+                        {budgets.find(b => b.id === selectedRequest.budgetId)?.month}
+                      </p>
+                    </div>
+                  )}
+                </div>
+
+                <div className="grid grid-cols-1 gap-3 mb-4">
+                  <button 
+                    onClick={() => setIsEditModalOpen(true)}
+                    className="flex items-center justify-center gap-2 px-4 py-2 border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-lg font-medium transition-colors"
+                  >
+                    <Edit className="w-4 h-4" />
+                    Modifier la demande
+                  </button>
                 </div>
 
                 <div className="grid grid-cols-2 gap-3 mt-auto">
@@ -193,6 +224,12 @@ export function PaymentQueue() {
           </div>
         </div>
       </Modal>
+
+      <EditPaymentModal 
+        isOpen={isEditModalOpen}
+        onClose={() => setIsEditModalOpen(false)}
+        paymentRequest={selectedRequest}
+      />
     </>
   );
 }

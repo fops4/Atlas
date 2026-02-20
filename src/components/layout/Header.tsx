@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Cloud, CloudOff, Bell, Menu } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 import { useUIStore } from '../../store/uiStore';
 
 export function Header() {
   const [isOnline, setIsOnline] = useState(navigator.onLine);
-  const [pendingSync, setPendingSync] = useState(3);
+  const [pendingSync, setPendingSync] = useState(5);
   const user = useAuthStore((state) => state.user);
   const { toggleSidebar } = useUIStore();
 
@@ -60,7 +61,7 @@ export function Header() {
           <Bell className="w-6 h-6" />
           <span className="absolute top-0 right-0 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
         </button>
-        <div className="flex items-center gap-3 pl-4 md:pl-6 border-l border-slate-200">
+        <Link to="/profile" className="flex items-center gap-3 pl-4 md:pl-6 border-l border-slate-200 hover:opacity-80 transition-opacity">
           <div className="text-right hidden md:block">
             <p className="text-sm font-medium text-slate-900">
               {user ? `${user.firstName} ${user.lastName}` : 'Utilisateur'}
@@ -74,7 +75,7 @@ export function Header() {
               className="w-full h-full object-cover"
             />
           </div>
-        </div>
+        </Link>
       </div>
     </header>
   );
