@@ -1,5 +1,5 @@
 import { useState, useMemo } from 'react';
-import { Plus, Search, Filter, CheckCircle, XCircle, Package, Truck, Edit, Trash2, Eye } from 'lucide-react';
+import { Plus, Search, Filter, CheckCircle, XCircle, Package, Truck, Edit, Trash2, Eye, RotateCcw } from 'lucide-react';
 import { useLogisticsStore, RationRequest, RationItem } from '../../store/logisticsStore';
 import { Modal } from '../ui/Modal';
 import { cn } from '../../lib/utils';
@@ -296,16 +296,30 @@ export function RationRequestManager() {
   const [viewingRequest, setViewingRequest] = useState<RationRequest | null>(null);
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<'ALL' | RationRequest['status']>('ALL');
+  const [dateRange, setDateRange] = useState({ start: '', end: '' });
   const notify = useNotification();
 
   const filteredRequests = useMemo(() => {
-    return rationRequests.filter(req => {
-      const matchesSearch = req.requestedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
-                           req.id.toLowerCase().includes(searchQuery.toLowerCase());
-      const matchesStatus = statusFilter === 'ALL' || req.status === statusFilter;
-      return matchesSearch && matchesStatus;
-    });
-  }, [rationRequests, searchQuery, statusFilter]);
+    return [...rationRequests]
+      .sort((a, b) => new Date(b.date).getTime() - new Date(a.date).getTime())
+      .filter(req => {
+        const matchesSearch = req.requestedBy.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                             req.id.toLowerCase().includes(searchQuery.toLowerCase());
+        const matchesStatus = statusFilter === 'ALL' || req.status === statusFilter;
+        
+        const reqDate = new Date(req.date);
+        const matchesDate = (!dateRange.start || reqDate >= new Date(dateRange.start)) &&
+                           (!dateRange.end || reqDate <= new Date(dateRange.end));
+
+        return matchesSearch && matchesStatus && matchesDate;
+      });
+  }, [rationRequests, searchQuery, statusFilter, dateRange]);
+
+  const resetFilters = () => {
+    setSearchQuery('');
+    setStatusFilter('ALL');
+    setDateRange({ start: '', end: '' });
+  };
 
   const handleDelete = (request: RationRequest) => {
     confirm(`Supprimer la demande ${request.id} ?`, () => {
@@ -380,37 +394,46 @@ export function RationRequestManager() {
       {/* Header */}
       <div className="flex justify-between items-start">
         <div>
-          <h2 className="text-2xl font-bold text-slate-900">Expressions du besoin</h2>
-          <p className="text-slate-500 mt-1">Gérez les expressions du besoin et approvisionnements</p>
+          <h2 className="text-2xl font-bold text-slate-900">Suivi des Expressions de Besoins</h2>
+          <p className="text-slate-500 mt-1">Historique complet et gestion des approvisionnements</p>
         </div>
         <button
           onClick={handleAdd}
           className="flex items-center gap-2 px-4 py-2.5 bg-brand-blue text-white rounded-lg font-medium hover:bg-blue-700 transition-colors shadow-sm"
         >
           <Plus className="w-4 h-4" />
-          Nouvelle demande
+          Nouvelle Expression
         </button>
       </div>
 
       {/* Filters */}
       <div className="bg-white rounded-xl shadow-sm border border-slate-100 p-4">
-        <div className="flex items-center gap-2 mb-3">
-          <Filter className="w-4 h-4 text-slate-600" />
-          <h3 className="font-semibold text-slate-900 text-sm">Filtres</h3>
+        <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center gap-2">
+            <Filter className="w-4 h-4 text-slate-600" />
+            <h3 className="font-semibold text-slate-900 text-sm">Filtres de l'Historique</h3>
+          </div>
+          <button 
+            onClick={resetFilters}
+            className="text-xs text-slate-500 hover:text-brand-blue flex items-center gap-1 transition-colors"
+          >
+            <RotateCcw className="w-3 h-3" />
+            Réinitialiser
+          </button>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="relative">
+        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+          <div className="relative md:col-span-1">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Rechercher par demandeur ou ID..."
-              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-blue focus:border-brand-blue"
+              placeholder="Rechercher..."
+              className="w-full pl-10 pr-4 py-2 border border-slate-300 rounded-lg focus:ring-brand-blue focus:border-brand-blue text-sm"
               value={searchQuery}
               onChange={e => setSearchQuery(e.target.value)}
             />
           </div>
           <select
-            className="p-2 border border-slate-300 rounded-lg bg-white focus:ring-brand-blue focus:border-brand-blue"
+            className="p-2 border border-slate-300 rounded-lg bg-white focus:ring-brand-blue focus:border-brand-blue text-sm"
             value={statusFilter}
             onChange={e => setStatusFilter(e.target.value as any)}
           >
@@ -420,6 +443,26 @@ export function RationRequestManager() {
             <option value="REJECTED">Rejeté</option>
             <option value="DELIVERED">Livré</option>
           </select>
+          <div className="flex items-center gap-2">
+            <input
+              type="date"
+              className="flex-1 p-2 border border-slate-300 rounded-lg text-sm"
+              value={dateRange.start}
+              onChange={e => setDateRange({ ...dateRange, start: e.target.value })}
+            />
+            <span className="text-slate-400">à</span>
+            <input
+              type="date"
+              className="flex-1 p-2 border border-slate-300 rounded-lg text-sm"
+              value={dateRange.end}
+              onChange={e => setDateRange({ ...dateRange, end: e.target.value })}
+            />
+          </div>
+          <div className="text-right flex items-center justify-end">
+            <span className="text-xs text-slate-500 font-medium bg-slate-100 px-2 py-1 rounded">
+              {filteredRequests.length} résultat(s)
+            </span>
+          </div>
         </div>
       </div>
 

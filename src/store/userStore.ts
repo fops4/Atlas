@@ -1,10 +1,12 @@
 import { create } from 'zustand';
+import type { UserRole } from '../types';
 
 export type AccessLevel = 'NONE' | 'USER' | 'ADMIN';
 
 export interface PageAccess {
     dashboard: AccessLevel;
     finance: AccessLevel;
+    budget: AccessLevel;
     hr: AccessLevel;
     operations: AccessLevel;
     logistics: AccessLevel;
@@ -15,7 +17,7 @@ export interface User {
     id: string;
     username: string;
     email: string;
-    role: 'ADMIN' | 'USER';
+    role: UserRole;
     status: 'ACTIVE' | 'ARCHIVED';
     access: PageAccess;
     createdAt: string;
@@ -46,6 +48,7 @@ export const useUserStore = create<UserState>((set) => ({
             access: {
                 dashboard: 'ADMIN',
                 finance: 'ADMIN',
+                budget: 'ADMIN',
                 hr: 'ADMIN',
                 operations: 'ADMIN',
                 logistics: 'ADMIN',
@@ -63,6 +66,7 @@ export const useUserStore = create<UserState>((set) => ({
         access: {
             dashboard: 'ADMIN',
             finance: 'ADMIN',
+            budget: 'ADMIN',
             hr: 'ADMIN',
             operations: 'ADMIN',
             logistics: 'ADMIN',

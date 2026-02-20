@@ -1,0 +1,2 @@
+﻿src/components/ErrorBoundary.tsx(25,35): error TS6133: 'error' is declared but its value is never read.
+src/components/hr/GlobalSanctionHistory.tsx(2,47): error TS6133: 'Filter' is declared but its value is never read.

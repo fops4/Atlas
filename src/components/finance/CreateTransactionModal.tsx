@@ -8,12 +8,13 @@ interface CreateTransactionModalProps {
 }
 
 export const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({ isOpen, onClose }) => {
-  const { addTransaction, submitRequest } = useFinanceStore();
+  const { addTransaction, submitRequest, budgets } = useFinanceStore();
   const [formData, setFormData] = useState({
     description: '',
     amount: '',
     type: 'DEBIT',
     category: 'AUTRE',
+    budgetId: '',
     date: new Date().toISOString().split('T')[0]
   });
 
@@ -21,6 +22,10 @@ export const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({ 
     e.preventDefault();
     
     if (formData.type === 'DEBIT') {
+      if (!formData.budgetId) {
+        alert("Le budget est obligatoire pour une dépense.");
+        return;
+      }
       // Debits go to Pending Queue for validation
       submitRequest({
         task: formData.description,
@@ -28,6 +33,7 @@ export const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({ 
         requester: 'Admin (Manuel)',
         momo: 'N/A',
         date: formData.date,
+        budgetId: formData.budgetId,
       });
     } else {
       // Credits go directly to Ledger
@@ -46,6 +52,7 @@ export const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({ 
       amount: '',
       type: 'DEBIT',
       category: 'AUTRE',
+      budgetId: '',
       date: new Date().toISOString().split('T')[0]
     });
   };
@@ -114,6 +121,28 @@ export const CreateTransactionModal: React.FC<CreateTransactionModalProps> = ({ 
             </select>
           </div>
         </div>
+
+        {formData.type === 'DEBIT' && (
+          <div>
+            <label className="block text-sm font-medium text-brand-red">Budget Mensuel (Obligatoire)</label>
+            <select
+              required
+              className="mt-1 block w-full rounded-md border-brand-red shadow-sm focus:border-brand-blue focus:ring-brand-blue sm:text-sm border p-2"
+              value={formData.budgetId}
+              onChange={e => setFormData({ ...formData, budgetId: e.target.value })}
+            >
+              <option value="">Sélectionner un budget...</option>
+              {budgets.map(b => (
+                <option key={b.id} value={b.id}>
+                  {b.month} - {b.totalAmount.toLocaleString()} FCFA
+                </option>
+              ))}
+            </select>
+            {budgets.length === 0 && (
+              <p className="text-xs text-brand-red mt-1">Aucun budget validé trouvé. Créez-en un d'abord.</p>
+            )}
+          </div>
+        )}
 
         <div className="mt-5 sm:mt-6 sm:grid sm:grid-flow-row-dense sm:grid-cols-2 sm:gap-3">
           <button

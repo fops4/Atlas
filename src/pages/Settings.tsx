@@ -20,10 +20,11 @@ function UserForm({ isOpen, onClose, userToEdit }: UserFormProps) {
   const [formData, setFormData] = useState({
     username: userToEdit?.username || '',
     email: userToEdit?.email || '',
-    role: userToEdit?.role || 'USER' as 'ADMIN' | 'USER',
+    role: userToEdit?.role || 'STAFF' as any,
     access: userToEdit?.access || {
       dashboard: 'USER' as AccessLevel,
       finance: 'NONE' as AccessLevel,
+      budget: 'NONE' as AccessLevel,
       hr: 'NONE' as AccessLevel,
       operations: 'NONE' as AccessLevel,
       logistics: 'NONE' as AccessLevel,
@@ -46,6 +47,7 @@ function UserForm({ isOpen, onClose, userToEdit }: UserFormProps) {
   const pages = [
     { key: 'dashboard' as keyof PageAccess, label: 'Tableau de Bord' },
     { key: 'finance' as keyof PageAccess, label: 'Finance' },
+    { key: 'budget' as keyof PageAccess, label: 'Gestion Budgétaire' },
     { key: 'hr' as keyof PageAccess, label: 'Ressources Humaines' },
     { key: 'operations' as keyof PageAccess, label: 'Exploitation Agricole' },
     { key: 'logistics' as keyof PageAccess, label: 'Logistique' },
@@ -81,10 +83,13 @@ function UserForm({ isOpen, onClose, userToEdit }: UserFormProps) {
           <select 
             className="w-full p-2 border border-slate-300 rounded-lg bg-white focus:ring-brand-blue focus:border-brand-blue"
             value={formData.role}
-            onChange={e => setFormData({ ...formData, role: e.target.value as 'ADMIN' | 'USER' })}
+            onChange={e => setFormData({ ...formData, role: e.target.value as any })}
           >
-            <option value="USER">Utilisateur</option>
-            <option value="ADMIN">Administrateur</option>
+            <option value="ADMIN">Administrateur (ADMIN)</option>
+            <option value="RAF">Resp. Financier (RAF)</option>
+            <option value="RH">Ressources Humaines (RH)</option>
+            <option value="MANAGER">Manager Terrain</option>
+            <option value="STAFF">Personnel (STAFF)</option>
           </select>
         </div>
 
@@ -255,7 +260,10 @@ export default function Settings() {
           >
             <option value="ALL">Tous les rôles</option>
             <option value="ADMIN">Administrateurs</option>
-            <option value="USER">Utilisateurs</option>
+            <option value="RAF">RAF</option>
+            <option value="RH">RH</option>
+            <option value="MANAGER">Managers</option>
+            <option value="STAFF">Staff</option>
           </select>
         </div>
         <div className="mt-3 text-sm text-slate-600">
@@ -289,10 +297,14 @@ export default function Settings() {
                   <td className="px-6 py-4">
                     <span className={cn(
                       "inline-flex items-center gap-1 px-2.5 py-1 rounded-full text-xs font-medium",
-                      user.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 'bg-blue-100 text-blue-700'
+                      user.role === 'ADMIN' ? 'bg-purple-100 text-purple-700' : 
+                      user.role === 'RAF' ? 'bg-blue-100 text-blue-700' :
+                      user.role === 'RH' ? 'bg-orange-100 text-orange-700' :
+                      user.role === 'MANAGER' ? 'bg-brand-green/10 text-brand-green' :
+                      'bg-slate-100 text-slate-700'
                     )}>
                       <Shield className="w-3 h-3" />
-                      {user.role === 'ADMIN' ? 'Administrateur' : 'Utilisateur'}
+                      {user.role}
                     </span>
                   </td>
                   <td className="px-6 py-4">

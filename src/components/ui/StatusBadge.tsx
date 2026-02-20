@@ -1,9 +1,11 @@
 import React from 'react';
-import { cn } from '../../utils/format';
+import { cn } from '../../lib/utils';
 import type { TaskStatus } from '../../types';
 
+export type BudgetStatus = 'DRAFT' | 'VALIDATED' | 'OVER_BUDGET';
+
 interface StatusBadgeProps {
-  status: TaskStatus | 'ACTIVE' | 'PENDING' | 'INACTIVE';
+  status: TaskStatus | 'ACTIVE' | 'PENDING' | 'INACTIVE' | BudgetStatus;
   className?: string;
 }
 
@@ -39,6 +41,18 @@ const statusConfig: Record<string, { label: string; className: string }> = {
   INACTIVE: {
     label: 'Inactif',
     className: 'bg-gray-100 text-gray-800 border-gray-200',
+  },
+  DRAFT: {
+    label: 'Brouillon',
+    className: 'bg-slate-100 text-slate-700 border-slate-200',
+  },
+  VALIDATED: {
+    label: 'Validé',
+    className: 'bg-profit-100 text-profit-800 border-profit-200',
+  },
+  OVER_BUDGET: {
+    label: 'Dépassement',
+    className: 'bg-alert-100 text-alert-800 border-alert-200',
   },
 };
 

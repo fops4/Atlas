@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { cn } from '../../utils/format';
+import { cn } from '../../lib/utils';
 
 interface FinancialInputProps {
   value: number;
@@ -9,6 +9,7 @@ interface FinancialInputProps {
   error?: string;
   disabled?: boolean;
   className?: string;
+  required?: boolean;
 }
 
 export const FinancialInput: React.FC<FinancialInputProps> = ({
@@ -19,17 +20,18 @@ export const FinancialInput: React.FC<FinancialInputProps> = ({
   error,
   disabled = false,
   className = '',
+  required = false,
 }) => {
   const [displayValue, setDisplayValue] = useState('');
 
-  // Format number with thousand separators
+  // Format number with thousand separators (space)
   const formatNumber = (num: number): string => {
-    return new Intl.NumberFormat('fr-FR').format(num);
+    return num.toLocaleString('fr-FR').replace(/,/g, ' ');
   };
 
   // Parse formatted string back to number
   const parseNumber = (str: string): number => {
-    const cleaned = str.replace(/\s/g, '').replace(/\./g, '');
+    const cleaned = str.replace(/\s/g, '');
     return parseInt(cleaned, 10) || 0;
   };
 
@@ -38,8 +40,13 @@ export const FinancialInput: React.FC<FinancialInputProps> = ({
   }, [value]);
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const input = e.target.value;
+    const input = e.target.value.replace(/[^\d\s]/g, '');
     const numericValue = parseNumber(input);
+    
+    // Prevent exceeding reasonable limits (e.g., 999M)
+    if (numericValue > 999999999) return;
+    
+    setDisplayValue(numericValue > 0 ? formatNumber(numericValue) : '');
     onChange(numericValue);
   };
 
@@ -50,8 +57,9 @@ export const FinancialInput: React.FC<FinancialInputProps> = ({
   return (
     <div className={className}>
       {label && (
-        <label className="block text-sm font-medium text-gray-700 mb-1">
+        <label className="block text-sm font-medium text-slate-700 mb-1">
           {label}
+          {required && <span className="text-red-500 ml-1">*</span>}
         </label>
       )}
       <div className="relative">
@@ -64,21 +72,21 @@ export const FinancialInput: React.FC<FinancialInputProps> = ({
           placeholder={placeholder}
           disabled={disabled}
           className={cn(
-            'block w-full rounded-md border pr-16 pl-4 py-2.5 text-gray-900 font-mono',
-            'placeholder:text-gray-400',
-            'focus:ring-2 focus:ring-holding-500 focus:border-holding-500',
-            'disabled:bg-gray-50 disabled:text-gray-500 disabled:cursor-not-allowed',
+            'block w-full rounded-lg border pr-16 pl-4 py-2.5 text-slate-900 font-mono transition-all',
+            'placeholder:text-slate-400',
+            'focus:ring-2 focus:ring-brand-blue focus:border-brand-blue',
+            'disabled:bg-slate-50 disabled:text-slate-500 disabled:cursor-not-allowed',
             error
-              ? 'border-alert-300 focus:ring-alert-500 focus:border-alert-500'
-              : 'border-gray-300'
+              ? 'border-red-300 focus:ring-red-500 focus:border-red-500'
+              : 'border-slate-300'
           )}
         />
         <div className="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
-          <span className="text-gray-500 sm:text-sm font-medium">FCFA</span>
+          <span className="text-slate-500 sm:text-sm font-medium">FCFA</span>
         </div>
       </div>
       {error && (
-        <p className="mt-1 text-sm text-alert-600">{error}</p>
+        <p className="mt-1 text-sm text-red-600">{error}</p>
       )}
     </div>
   );
